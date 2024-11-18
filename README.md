@@ -5,7 +5,7 @@
 ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
 ![macOS](https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=macos&logoColor=F0F0F0)
 
-Basic C++ library to communicate with serial porst in POSIX-compliant operating systems.
+Basic C++ library to communicate with serial ports in POSIX-compliant operating systems.
 
 ## Prerequisites
 
@@ -23,8 +23,8 @@ Follow these steps to clone the repository, build the project, and run an exampl
 Start by cloning the project repository from GitHub.
 
 ```bash
-git clone git@github.com:uOttawaCAV/serial_comm.git
-cd serial_comm
+git clone git@github.com:uOttawaCAV/serial.git
+cd serial
 ```
 
 ### 2. Create a Build Directory
