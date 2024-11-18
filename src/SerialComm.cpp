@@ -15,6 +15,9 @@
 // write(), read(), close()
 #include <unistd.h>
 
+// Necessary for timeout capabilities
+#include <sys/time.h>
+
 namespace SerialComm
 {
 
@@ -63,6 +66,33 @@ namespace SerialComm
         return (bytes_written == static_cast<int>(message.size())) ? SerialError::SUCCESS : SerialError::ERROR_CONFIGURE_DEVICE;
     }
 
+    int SerialPort::sendAndReceiveMessage(const std::string &message, char *buffer, size_t buffer_size, unsigned int timeout)
+    {
+        Timer timer;
+        timer.start(); // Start the timer
+
+        // Write the message
+        int bytes_written = write(fd, message.c_str(), message.size());
+
+        size_t total_bytes_read = 0;
+        while (timer.getElapsedTime() < timeout)
+        {
+            // Try reading from the serial port
+            int bytes_read = read(fd, buffer + total_bytes_read, buffer_size - total_bytes_read - 1);
+            if (bytes_read > 0)
+            {
+                buffer[bytes_read] = '\0';
+
+                timer.stop(); // Stop the timer
+                return bytes_read;
+            }
+            // Sleep briefly to avoid busy waiting
+            usleep(1000); // 1 ms
+        }
+
+        return -1;
+    }
+
     int SerialPort::receiveMessage(char *buffer, size_t buffer_size)
     {
         int bytes_read = read(fd, buffer, buffer_size - 1);
@@ -73,6 +103,7 @@ namespace SerialComm
         return bytes_read;
     }
 
+
     void SerialPort::close()
     {
         ::close(fd);
@@ -80,6 +111,55 @@ namespace SerialComm
     }
 
 } // namespace SerialComm
+
+class Timer
+{
+private:
+    struct timeval start_time;
+    struct timeval end_time;
+    bool running;
+
+public:
+    Timer() : running(false) {}
+
+    // Start the timer
+    void start()
+    {
+        gettimeofday(&start_time, nullptr);
+        running = true;
+    }
+
+    // Stop the timer
+    void stop()
+    {
+        if (running)
+        {
+            gettimeofday(&end_time, nullptr);
+            running = false;
+        }
+    }
+
+    // Get elapsed time in seconds
+    double getElapsedTime()
+    {
+        struct timeval now;
+        if (running)
+        {
+            gettimeofday(&now, nullptr);
+            return calculateElapsedTime(start_time, now);
+        }
+        return calculateElapsedTime(start_time, end_time);
+    }
+
+private:
+    // Helper function to calculate elapsed time
+    double calculateElapsedTime(const struct timeval &start, const struct timeval &end)
+    {
+        double seconds = end.tv_sec - start.tv_sec;
+        double microseconds = (end.tv_usec - start.tv_usec) / 1e6;
+        return seconds + microseconds;
+    }
+};
 
 // int main () {
 //     int device = open("/dev/cu.usbmodemHDC2XXX1", O_RDWR);

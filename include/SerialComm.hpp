@@ -12,7 +12,8 @@ namespace SerialComm
     {
         SUCCESS = 0,
         ERROR_OPEN_DEVICE = -1,
-        ERROR_CONFIGURE_DEVICE = -2
+        ERROR_CONFIGURE_DEVICE = -2,
+        ERROR_TIMEOUT = -3
     };
 
     enum class BAUDRATE
@@ -35,10 +36,23 @@ namespace SerialComm
         SerialError open(const std::string &device_name);
         SerialError configure(BAUDRATE baud_rate);
         SerialError sendMessage(const std::string &message);
+        int sendAndReceiveMessage(const std::string &message, char *buffer, size_t buffer_size, unsigned int timeout);
         int receiveMessage(char *buffer, size_t buffer_size);
         void close();
     };
 
 } // namespace SerialComm
+
+class Timer
+{
+public:
+    void start();
+    void stop();
+    double getElapsedTime();
+
+private:
+    struct timeval start_time;    
+};
+
 
 #endif // SerialPort_HPP

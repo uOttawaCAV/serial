@@ -21,10 +21,21 @@ int main()
 
 
     while (true) {
-        device.sendMessage("?C\r");
+        //device.sendMessage("?C\r");
+
+        // char buffer[256];
+        // int bytes_received = device.receiveMessage(buffer, sizeof(buffer));
+        // if (bytes_received > 0)
+        // {
+        //     std::cout << "Received: " << buffer << '\n';
+        // }
+        // else
+        // {
+        //     std::cerr << "No response received\n";
+        // }
 
         char buffer[256];
-        int bytes_received = device.receiveMessage(buffer, sizeof(buffer));
+        int bytes_received = device.sendAndReceiveMessage("?C\r", buffer, sizeof(buffer), 1000);
         if (bytes_received > 0)
         {
             std::cout << "Received: " << buffer << '\n';
